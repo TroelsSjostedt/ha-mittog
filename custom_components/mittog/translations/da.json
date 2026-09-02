@@ -1,0 +1,91 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Tilføj en station",
+        "description": "Banedanmarks stationskode som på mittog.dk, fx VO (Vordingborg), NEL (København Syd), KH (København H).",
+        "data": {
+          "station": "Stationskode",
+          "station_name": "Visningsnavn (valgfrit)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kunne ikke forbinde til mittog.dk — tjek stationskoden.",
+      "no_trains": "Forbundet, men tavlen er tom. Er stationskoden rigtig?"
+    },
+    "abort": {
+      "already_configured": "Stationen er allerede oprettet."
+    }
+  },
+  "config_subentries": {
+    "departure": {
+      "entry_type": "Overvåget afgang",
+      "initiate_flow": {
+        "user": "Tilføj afgang",
+        "reconfigure": "Ret afgang"
+      },
+      "step": {
+        "user": {
+          "title": "Overvåg en afgang fra {station}",
+          "description": "Tog på tavlen lige nu (retning i parentes):\n\n{preview}",
+          "data": {
+            "name": "Navn",
+            "time": "Planlagt afgang",
+            "direction": "Retning"
+          },
+          "data_description": {
+            "name": "Bruges som enhedsnavn, fx \"Morgentog\".",
+            "direction": "Banedanmarks UP/DOWN. Brug listen ovenfor til at se hvad der er hvad på denne station."
+          }
+        },
+        "reconfigure": {
+          "title": "Ret afgang fra {station}",
+          "description": "Tog på tavlen lige nu (retning i parentes):\n\n{preview}",
+          "data": {
+            "name": "Navn",
+            "time": "Planlagt afgang",
+            "direction": "Retning"
+          }
+        }
+      },
+      "abort": {
+        "already_configured": "Denne afgang overvåges allerede.",
+        "reconfigure_successful": "Afgangen er opdateret."
+      }
+    }
+  },
+  "selector": {
+    "direction": {
+      "options": {
+        "UP": "UP",
+        "DOWN": "DOWN"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "naeste_afgang": { "name": "Næste afgang" },
+      "afgang": { "name": "Afgang" },
+      "forsinkelse": { "name": "Forsinkelse" },
+      "spor": { "name": "Spor" },
+      "vogne": { "name": "Vogne" },
+      "status": {
+        "name": "Status",
+        "state": {
+          "ikke_i_feed": "Ikke på tavlen",
+          "planlagt": "Planlagt",
+          "til_tiden": "Til tiden",
+          "forsinket": "Forsinket",
+          "aflyst": "Aflyst",
+          "afgaaet": "Afgået"
+        }
+      }
+    },
+    "binary_sensor": {
+      "forbindelse": { "name": "Forbindelse" },
+      "forsinket": { "name": "Forsinket" },
+      "aflyst": { "name": "Aflyst" }
+    }
+  }
+}

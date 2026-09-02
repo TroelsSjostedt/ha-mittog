@@ -1,0 +1,91 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a station",
+        "description": "Banedanmark station code as used on mittog.dk, e.g. VO (Vordingborg), NEL (København Syd), KH (København H).",
+        "data": {
+          "station": "Station code",
+          "station_name": "Display name (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to mittog.dk — check the station code.",
+      "no_trains": "Connected, but the board is empty. Is the station code right?"
+    },
+    "abort": {
+      "already_configured": "This station is already configured."
+    }
+  },
+  "config_subentries": {
+    "departure": {
+      "entry_type": "Watched departure",
+      "initiate_flow": {
+        "user": "Add departure",
+        "reconfigure": "Edit departure"
+      },
+      "step": {
+        "user": {
+          "title": "Watch a departure from {station}",
+          "description": "Trains on the board right now (direction in parentheses):\n\n{preview}",
+          "data": {
+            "name": "Name",
+            "time": "Scheduled departure",
+            "direction": "Direction"
+          },
+          "data_description": {
+            "name": "Used as the device name, e.g. \"Morning train\".",
+            "direction": "Banedanmark's UP/DOWN. Use the list above to see which is which for this station."
+          }
+        },
+        "reconfigure": {
+          "title": "Edit departure from {station}",
+          "description": "Trains on the board right now (direction in parentheses):\n\n{preview}",
+          "data": {
+            "name": "Name",
+            "time": "Scheduled departure",
+            "direction": "Direction"
+          }
+        }
+      },
+      "abort": {
+        "already_configured": "This departure is already watched.",
+        "reconfigure_successful": "Departure updated."
+      }
+    }
+  },
+  "selector": {
+    "direction": {
+      "options": {
+        "UP": "UP",
+        "DOWN": "DOWN"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "naeste_afgang": { "name": "Next departure" },
+      "afgang": { "name": "Departure" },
+      "forsinkelse": { "name": "Delay" },
+      "spor": { "name": "Track" },
+      "vogne": { "name": "Cars" },
+      "status": {
+        "name": "Status",
+        "state": {
+          "ikke_i_feed": "Not on the board",
+          "planlagt": "Scheduled",
+          "til_tiden": "On time",
+          "forsinket": "Delayed",
+          "aflyst": "Cancelled",
+          "afgaaet": "Departed"
+        }
+      }
+    },
+    "binary_sensor": {
+      "forbindelse": { "name": "Connection" },
+      "forsinket": { "name": "Delayed" },
+      "aflyst": { "name": "Cancelled" }
+    }
+  }
+}

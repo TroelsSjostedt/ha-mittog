@@ -8,10 +8,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, time, timedelta
+from itertools import groupby
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from .const import DELAY_THRESHOLD_MIN, DEPARTED_GRACE, STATION_NAMES, UNIT_TYPES
+from .const import (
+    DELAY_THRESHOLD_MIN,
+    DEPARTED_GRACE,
+    STATION_ALIASES,
+    STATION_NAMES,
+    UNIT_TYPES,
+)
 
 TZ = ZoneInfo("Europe/Copenhagen")
 
@@ -34,6 +41,7 @@ def station_name(code: str | None) -> str | None:
     """Human name for a Banedanmark station code, falling back to the code."""
     if not code:
         return None
+    code = STATION_ALIASES.get(code, code)
     return STATION_NAMES.get(code, code)
 
 
@@ -133,8 +141,12 @@ class Train:
 
     @property
     def consist(self) -> str:
-        """Compact description, e.g. 'IC3 + IC3'."""
-        return " + ".join(unit.label for unit in self.units)
+        """Compact description: '2 × IC3', 'Lokomotiv + 4 × Dobbeltdækker'."""
+        parts: list[str] = []
+        for label, run in groupby(unit.label for unit in self.units):
+            n = len(list(run))
+            parts.append(label if n == 1 else f"{n} × {label}")
+        return " + ".join(parts)
 
     @property
     def status(self) -> str:

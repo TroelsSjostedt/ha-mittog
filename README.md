@@ -46,8 +46,9 @@ Per watched departure (device named as you chose):
 
 Trains appear on the board roughly five hours ahead and get a forecast about
 an hour before departure. Until then the departure sensors are `unknown` /
-`ikke_i_feed`; that is expected, not a fault. A departed train stays visible
-for an hour so automations can react to it.
+`ikke_i_feed`; that is expected, not a fault. The feed drops a train within
+seconds of it leaving, so `ikke_i_feed` after the scheduled time means it has
+departed.
 
 ## Development
 

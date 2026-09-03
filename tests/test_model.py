@@ -3,7 +3,7 @@ import json
 from datetime import datetime, time
 
 
-from mittog.model import TZ, parse_board, parse_ts, train_attributes, train_summary  # noqa: E402
+from mittog.model import TZ, parse_board, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
 
 import pathlib
 FIX = pathlib.Path(__file__).resolve().parent / "fixtures"
@@ -41,12 +41,14 @@ def test_nel_delay_and_consist():
     b = load("NEL")
     t = next(x for x in b.trains if x.train_id == "2424")
     assert t.delay_minutes == 3 and t.is_delayed and t.status == "forsinket"
-    assert t.consist == "IC3 + IC3" and t.car_numbers == ["11", "12", "22", "21"]
+    assert t.consist == "2 × IC3" and t.car_numbers == ["11", "12", "22", "21"]
     dd = next(x for x in b.trains if x.train_id == "4445")
     assert dd.car_numbers == ["1", "14", "13", "12", "11"]
     assert dd.units[0].label == "Lokomotiv"
+    assert dd.consist == "Lokomotiv + 4 × Dobbeltdækker"
     ic = next(x for x in b.trains if x.train_id == "826")
     assert len(ic.units) == 2 and ic.destination == "HGL"
+    assert station_name("HGL") == "Østerport" and station_name("HG") == "Helsingør"
 
 
 def test_find_departure():

@@ -110,10 +110,15 @@ class Train:
 
     @property
     def delay_minutes(self) -> int | None:
-        """Delay in whole minutes, None while there is no forecast."""
+        """Delay in whole minutes, None while there is no forecast.
+
+        Rounded, not truncated: the platform displays round 1:48 up to 2 min,
+        and a card that disagrees with the sign above the track is worse than
+        useless. Confirmed against Vordingborg on 7 Sep 2026.
+        """
         if self.estimated is None:
             return None
-        return max(0, int((self.estimated - self.scheduled).total_seconds() // 60))
+        return max(0, round((self.estimated - self.scheduled).total_seconds() / 60))
 
     @property
     def is_delayed(self) -> bool:

@@ -1,9 +1,9 @@
 """Unit tests for the feed parser. Run: .venv/bin/python -m pytest tests/"""
 import json
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 
-from mittog.model import TZ, parse_board, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
+from mittog.model import TZ, Train, parse_board, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
 
 import pathlib
 FIX = pathlib.Path(__file__).resolve().parent / "fixtures"
@@ -76,3 +76,25 @@ def test_upcoming_and_attributes():
     assert attrs["destination"] == "København H"
     s = train_summary(t)
     assert s["forventet"] == "11:40" and s["planlagt"] == "11:37"
+
+
+def test_delay_rounds_to_nearest_minute():
+    """1:48 late is 2 minutes on the platform display, not 1."""
+    sched = datetime(2026, 9, 7, 6, 55, 0, tzinfo=TZ)
+    for secs, expected in ((0, 0), (29, 0), (31, 1), (108, 2), (-60, 0)):
+        t = Train(
+            train_id="1208",
+            product="RØ",
+            scheduled=sched,
+            estimated=sched + timedelta(seconds=secs),
+            direction="DOWN",
+            track="2",
+            track_previous=None,
+            track_original=None,
+            cancelled=False,
+            departed=None,
+            information_type="NORMAL",
+            remark=None,
+            units=[],
+        )
+        assert t.delay_minutes == expected, f"{secs}s -> {t.delay_minutes}, want {expected}"

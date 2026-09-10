@@ -98,3 +98,28 @@ def test_delay_rounds_to_nearest_minute():
             units=[],
         )
         assert t.delay_minutes == expected, f"{secs}s -> {t.delay_minutes}, want {expected}"
+
+
+def test_stops_come_from_the_front_unit():
+    """The stop list is per-unit; the front unit's route is the one shown."""
+    board = load("NEL")
+    train = next(t for t in board.trains if t.train_id == "822")
+    codes = [s.code for s in train.stops]
+    assert codes[:3] == ["KH", "KN", "KK"]
+    assert train.stops[0].name == "København H"
+    assert train.stops[0].expected is not None
+    attrs = train_attributes(train)
+    assert attrs["stop"][0]["station"] == "København H"
+    assert attrs["stop"][0]["kode"] == "KH"
+    assert attrs["stop"][0]["aflyst"] is False
+
+
+def test_front_and_rear_car_follow_feed_order():
+    """vogne[0] is the front — confirmed on the platform at Vordingborg."""
+    board = load("NEL")
+    train = next(t for t in board.trains if t.train_id == "2424")
+    assert train.car_numbers == ["11", "12", "22", "21"]
+    assert train.front_car == "11"
+    assert train.rear_car == "21"
+    attrs = train_attributes(train)
+    assert attrs["forende"] == "11" and attrs["bagende"] == "21"

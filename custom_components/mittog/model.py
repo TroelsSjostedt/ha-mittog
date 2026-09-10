@@ -66,6 +66,19 @@ class Car:
 
 
 @dataclass(frozen=True)
+class Stop:
+    """One station on a unit's onward route, with its expected time."""
+
+    code: str
+    expected: datetime | None
+    cancelled: bool
+
+    @property
+    def name(self) -> str:
+        return station_name(self.code) or self.code
+
+
+@dataclass(frozen=True)
 class Unit:
     """One train set / vehicle in the consist, in platform order."""
 
@@ -75,6 +88,7 @@ class Unit:
     cars: tuple[Car, ...]
     not_accessible: bool
     remarks: tuple[str, ...]
+    stops: tuple[Stop, ...] = ()
 
     @property
     def label(self) -> str:
@@ -135,6 +149,41 @@ class Train:
             if unit.destination:
                 return unit.destination
         return None
+
+    @property
+    def stops(self) -> tuple[Stop, ...]:
+        """Onward route of the FRONT unit.
+
+        Stops are per-unit because a train can split en route; the front unit
+        is the one the platform display draws first, so its route is the one a
+        passenger reads. `splits` says when the other units disagree.
+        """
+        for unit in self.units:
+            if unit.stops:
+                return unit.stops
+        return ()
+
+    @property
+    def splits(self) -> bool:
+        """True when the units do not all run to the same destination."""
+        seen = {u.destination for u in self.units if u.destination}
+        return len(seen) > 1
+
+    @property
+    def front_car(self) -> str | None:
+        """Car number at the front, in the direction of travel.
+
+        The feed lists cars train-relative, front first. Verified against the
+        platform display at Vordingborg on 7 Sep 2026 (RO 1273, 22-21-12-11
+        toward Nykobing F, car 22 physically at the front).
+        """
+        numbers = self.car_numbers
+        return numbers[0] if numbers else None
+
+    @property
+    def rear_car(self) -> str | None:
+        numbers = self.car_numbers
+        return numbers[-1] if numbers else None
 
     @property
     def cars(self) -> tuple[Car, ...]:
@@ -216,6 +265,15 @@ def _parse_unit(raw: dict[str, Any]) -> Unit:
         for d in raw.get("Doors") or ()
     )
     remarks = tuple(str(r) for r in raw.get("Remarks") or () if r)
+    stops = tuple(
+        Stop(
+            code=str(st.get("StationId") or ""),
+            expected=parse_ts(st.get("ExpectedDateTime")),
+            cancelled=bool(st.get("IsCancelled")),
+        )
+        for st in raw.get("Stations") or ()
+        if st.get("StationId")
+    )
     return Unit(
         unit_type=str(raw.get("UnitType") or ""),
         unit_id=raw.get("UnitId"),
@@ -223,6 +281,7 @@ def _parse_unit(raw: dict[str, Any]) -> Unit:
         cars=cars,
         not_accessible=bool(raw.get("NotAccessibleToPassengers")),
         remarks=remarks,
+        stops=stops,
     )
 
 
@@ -306,6 +365,18 @@ def train_attributes(train: Train) -> dict[str, Any]:
         "foerste_klasse": first_class,
         "stillezone": quiet,
         "cykler": bikes,
+        "forende": train.front_car,
+        "bagende": train.rear_car,
+        "stop": [
+            {
+                "station": s.name,
+                "kode": s.code,
+                "forventet": s.expected.isoformat() if s.expected else None,
+                "aflyst": s.cancelled,
+            }
+            for s in train.stops
+        ],
+        "deler_sig": train.splits,
         "bemaerkning": train.remark or None,
         "informationstype": train.information_type,
     }

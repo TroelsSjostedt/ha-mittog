@@ -60,3 +60,32 @@ uv venv .venv && uv pip install --python .venv/bin/python aiohttp pytest pyflake
 
 `model.py` and `client.py` have no Home Assistant dependency and are tested
 against recorded boards in `tests/fixtures/`.
+
+## The card
+
+The integration ships its own Lovelace card and registers it automatically —
+there is nothing to install and no resource to add by hand. After a restart,
+add it to a dashboard:
+
+```yaml
+type: custom:mittog-card
+entity: sensor.pa_arbejde_departure
+name: På arbejde        # optional, defaults to the entity name
+```
+
+It draws the platform display: expected time (struck-through schedule when
+late), product badge, destination, track (highlighted when it changed), and the
+train set with car numbers in **platform order**.
+
+**Direction.** The feed lists cars front-first — verified against the physical
+platform at Vordingborg on 7 September 2026. The card turns the drawing so the
+nose sits at the end the train departs towards: on Sydbanen, `DOWN` (towards
+København) draws the nose on the right, `UP` (towards Nykøbing F) on the left,
+matching how mittog.dk itself draws that platform. A red arrowhead marks the
+front, and the caption names the front and rear car by number.
+
+The card stays dark in both themes on purpose — it is a platform display.
+
+It also refuses to lie: if the websocket has been silent for two minutes the
+entity goes `unavailable` and the card says so, rather than showing stale
+times as if they were fresh.

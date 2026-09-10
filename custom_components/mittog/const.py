@@ -4,6 +4,10 @@ from datetime import timedelta
 
 DOMAIN = "mittog"
 
+# Frontend card shipped with the integration.
+VERSION = "0.2.0"
+CARD_URL = "/mittog_static/mittog-card.js"
+
 WS_URL = "wss://api.mittog.dk/api/ws/departure/{station}/dinstation/"
 WS_ORIGIN = "https://mittog.dk"
 

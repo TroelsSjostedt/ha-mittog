@@ -1,13 +1,18 @@
 {
   "domain": "mittog",
   "name": "MitTog",
-  "codeowners": ["@TroelsSjostedt"],
+  "codeowners": [
+    "@TroelsSjostedt"
+  ],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": [
+    "http",
+    "frontend"
+  ],
   "documentation": "https://github.com/TroelsSjostedt/ha-mittog",
   "integration_type": "hub",
   "iot_class": "cloud_push",
   "issue_tracker": "https://github.com/TroelsSjostedt/ha-mittog/issues",
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

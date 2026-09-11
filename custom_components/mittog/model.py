@@ -15,6 +15,9 @@ from zoneinfo import ZoneInfo
 from .const import (
     DELAY_THRESHOLD_MIN,
     DEPARTED_GRACE,
+    PRODUCT_COLORS,
+    PRODUCT_LABELS,
+    PRODUCT_OPERATORS,
     STATION_ALIASES,
     STATION_NAMES,
     UNIT_TYPES,
@@ -43,6 +46,18 @@ def station_name(code: str | None) -> str | None:
         return None
     code = STATION_ALIASES.get(code, code)
     return STATION_NAMES.get(code, code)
+
+
+def product_label(code: str | None) -> str:
+    """What the platform display calls this product.
+
+    The feed carries Banedanmark's internal code; every sign, announcement and
+    app shows something else — "RØ" is printed as "Re". The mapping is
+    mittog.dk's own, taken from the same bundle as the station table.
+    """
+    if not code:
+        return ""
+    return PRODUCT_LABELS.get(code, code)
 
 
 @dataclass(frozen=True)
@@ -217,7 +232,12 @@ class Train:
 
     @property
     def name(self) -> str:
-        return f"{self.product} {self.train_id}".strip()
+        label = product_label(self.product)
+        if self.product == "TRAINBUS":
+            # A replacement bus has an internal run number, not a train number
+            # anyone announces — showing it would only look like a train.
+            return label
+        return f"{label} {self.train_id}".strip()
 
 
 @dataclass(frozen=True)
@@ -344,6 +364,10 @@ def train_attributes(train: Train) -> dict[str, Any]:
         "tog": train.name,
         "tognummer": train.train_id,
         "produkt": train.product,
+        "produkt_navn": product_label(train.product),
+        "operatoer": PRODUCT_OPERATORS.get(train.product),
+        "produkt_farve": PRODUCT_COLORS.get(train.product, (None, None))[0],
+        "produkt_tekstfarve": PRODUCT_COLORS.get(train.product, (None, None))[1],
         "planlagt": train.scheduled.isoformat(),
         "forventet": train.expected.isoformat(),
         "prognose": train.has_forecast,

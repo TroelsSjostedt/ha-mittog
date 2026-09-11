@@ -8,7 +8,7 @@
  * Deliberately dark in both themes — it is a platform display, not a document.
  */
 
-const VERSION = "0.2.0";
+const VERSION = "0.3.0";
 
 // The feed lists cars front-first (verified on the platform at Vordingborg,
 // 7 Sep 2026). On Sydbanen the platform runs Nykøbing F on the left and
@@ -222,7 +222,12 @@ class MitTogCard extends HTMLElement {
       timeInner = `${esc(expected || planned)}<small>${a.prognose ? "Til tiden" : "Planlagt"}</small>`;
     }
 
-    const isIc = String(a.produkt || "").toUpperCase().startsWith("IC");
+    // Badge colours are mittog.dk's own, so the card matches the platform sign
+    // rather than approximating it: Re green, IC red, Lokaltog navy.
+    const badgeStyle =
+      a.produkt_farve && a.produkt_tekstfarve
+        ? ` style="background:${esc(a.produkt_farve)};color:${esc(a.produkt_tekstfarve)}"`
+        : "";
     const consist = [a.togsaet, a.vogne_antal ? `${a.vogne_antal} vogne` : null]
       .filter(Boolean)
       .join(" · ");
@@ -239,7 +244,7 @@ class MitTogCard extends HTMLElement {
     const main = `<div class="main">
         <div class="${timeCls}">${timeInner}</div>
         <div class="dest">
-          <span class="badge${isIc ? " ic" : ""}">${esc(a.tog)}</span>
+          <span class="badge"${badgeStyle}>${esc(a.tog)}</span>
           <span class="to">${esc(a.destination || "")}</span>
           ${consist ? `<span class="sub">${esc(consist)}</span>` : ""}
         </div>

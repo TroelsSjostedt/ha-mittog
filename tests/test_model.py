@@ -3,7 +3,7 @@ import json
 from datetime import datetime, time, timedelta
 
 
-from mittog.model import TZ, Train, parse_board, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
+from mittog.model import TZ, Train, parse_board, product_label, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
 
 import pathlib
 FIX = pathlib.Path(__file__).resolve().parent / "fixtures"
@@ -25,7 +25,7 @@ def test_vo_board():
     assert b.station == "VO"
     assert len(b.trains) == 20
     t = b.trains[0]
-    assert t.name == "RØ 4837"
+    assert t.name == "Re 4837"
     assert t.scheduled.strftime("%H:%M") == "11:30"
     assert t.has_forecast and t.delay_minutes == 0 and t.status == "til_tiden"
     assert t.track == "3" and not t.track_changed
@@ -123,3 +123,27 @@ def test_front_and_rear_car_follow_feed_order():
     assert train.rear_car == "21"
     attrs = train_attributes(train)
     assert attrs["forende"] == "11" and attrs["bagende"] == "21"
+
+
+def test_product_labels_match_the_platform_display():
+    """The feed says RØ; every sign, app and announcement says Re."""
+    assert product_label("RØ") == "Re"
+    assert product_label("IC") == "IC"
+    assert product_label("XP") == "ST"          # Snälltåget
+    assert product_label("TRAINBUS") == "Togbus"
+    assert product_label("ØD") == "L"           # Lokaltog
+    assert product_label("ZZZ") == "ZZZ"        # unknown code passes through
+    assert product_label(None) == ""
+
+
+def test_train_name_uses_the_label():
+    board = load("NEL")
+    train = next(t for t in board.trains if t.train_id == "2424")
+    assert train.product == "RØ"
+    assert train.name == "Re 2424"
+    attrs = train_attributes(train)
+    assert attrs["tog"] == "Re 2424"
+    assert attrs["produkt"] == "RØ"             # raw code kept
+    assert attrs["produkt_navn"] == "Re"
+    assert attrs["operatoer"] == "DSB"
+    assert attrs["produkt_farve"] == "#50AE30"

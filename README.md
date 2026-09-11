@@ -89,3 +89,17 @@ The card stays dark in both themes on purpose — it is a platform display.
 It also refuses to lie: if the websocket has been silent for two minutes the
 entity goes `unavailable` and the card says so, rather than showing stale
 times as if they were fresh.
+
+## Product codes
+
+The feed carries Banedanmark's internal product code, which is not what anyone
+sees on a platform: `RØ` is printed, announced and sold as **Re**. The
+integration maps all 54 codes from mittog.dk's own table — so `XP` shows as
+`ST` (Snälltåget), `ØD` as `L` (Lokaltog), and `TRAINBUS` as **Togbus** with no
+train number, because a replacement bus has an internal run number rather than
+a number anyone announces.
+
+The raw code stays available as the `produkt` attribute; `produkt_navn`,
+`operatoer` and the badge colours (`produkt_farve`, `produkt_tekstfarve`) carry
+the readable version. The card uses those colours directly, so a Re badge is
+the same green as the sign above the track.

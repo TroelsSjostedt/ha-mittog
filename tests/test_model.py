@@ -3,7 +3,7 @@ import json
 from datetime import datetime, time, timedelta
 
 
-from mittog.model import TZ, Train, _parse_train, bus_line, parse_board, product_label, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
+from mittog.model import TZ, Train, _parse_train, parse_board, product_label, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
 
 import pathlib
 FIX = pathlib.Path(__file__).resolve().parent / "fixtures"

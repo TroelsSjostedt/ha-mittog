@@ -103,3 +103,14 @@ The raw code stays available as the `produkt` attribute; `produkt_navn`,
 `operatoer` and the badge colours (`produkt_farve`, `produkt_tekstfarve`) carry
 the readable version. The card uses those colours directly, so a Re badge is
 the same green as the sign above the track.
+
+## Replacement buses
+
+A togbus has no train number worth showing — the id in the feed is an internal
+run number. What it has is a **coloured line**, carried in `LineName`, and the
+colour is what is painted on the bus and printed on the sign. The integration
+maps all eleven lines from mittog.dk's table, so a bus shows as "Rød togbus"
+with the line's own red badge. Matching is case-insensitive.
+
+A bus reports no composition, so the card says so rather than drawing an empty
+train. Its stop list works exactly like a train's.

@@ -3,7 +3,7 @@ import json
 from datetime import datetime, time, timedelta
 
 
-from mittog.model import TZ, Train, parse_board, product_label, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
+from mittog.model import TZ, Train, _parse_train, bus_line, parse_board, product_label, parse_ts, station_name, train_attributes, train_summary  # noqa: E402
 
 import pathlib
 FIX = pathlib.Path(__file__).resolve().parent / "fixtures"
@@ -147,3 +147,45 @@ def test_train_name_uses_the_label():
     assert attrs["produkt_navn"] == "Re"
     assert attrs["operatoer"] == "DSB"
     assert attrs["produkt_farve"] == "#50AE30"
+
+
+def _bus(line_name):
+    """A replacement-bus row shaped like the feed's."""
+    return _parse_train({
+        "PublicTrainId": "2012721",
+        "Product": "TRAINBUS",
+        "ScheduleTimeDeparture": "10-09-2026 22:25:00",
+        "EstimatedTimeDeparture": "01-01-0001 00:00:00",
+        "DepartureDirection": "DOWN",
+        "TrackCurrent": "?",
+        "Remark": "Busterminal foran stationen",
+        "InformationType": "NORMAL",
+        "LineName": line_name,
+        "TOC": "DSB",
+        "Routes": [{"DestinationStationId": "NÆ", "Stations": [
+            {"StationId": "NÆ", "ExpectedDateTime": "10-09-2026 23:10:00"}]}],
+    })
+
+
+def test_bus_line_gives_the_bus_a_colour_and_a_name():
+    """A togbus runs a coloured line, not a train number."""
+    red = _bus("rød")
+    assert red.line == "Rød"
+    assert red.name == "Rød togbus"
+    assert red.colors == ("#F03C1F", "#FFF")
+
+    # The feed's casing is not guaranteed; mittog.dk lowercases before matching.
+    assert _bus("Blå").line == "Blå"
+    assert _bus("TURKIS").name == "Turkis togbus"
+
+    plain = _bus(None)
+    assert plain.line is None
+    assert plain.name == "Togbus"
+    assert plain.colors == ("#767680", "#FFF")
+
+    attrs = train_attributes(red)
+    assert attrs["tog"] == "Rød togbus" and attrs["linje"] == "Rød"
+    assert attrs["produkt_farve"] == "#F03C1F"
+    assert attrs["operatoer"] == "DSB"
+    assert attrs["vogne"] == []          # buses report no composition
+    assert attrs["stop"][0]["station"] == "Næstved"

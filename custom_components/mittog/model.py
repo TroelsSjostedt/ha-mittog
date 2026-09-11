@@ -13,6 +13,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from .const import (
+    BUS_LINES,
     DELAY_THRESHOLD_MIN,
     DEPARTED_GRACE,
     PRODUCT_COLORS,
@@ -58,6 +59,17 @@ def product_label(code: str | None) -> str:
     if not code:
         return ""
     return PRODUCT_LABELS.get(code, code)
+
+
+def bus_line(line_name: str | None) -> tuple[str, str, str] | None:
+    """The coloured line a replacement bus runs, or None if it has no line.
+
+    Matched case-insensitively, the way mittog.dk matches it — the feed's
+    casing is not guaranteed and is not worth depending on.
+    """
+    if not line_name:
+        return None
+    return BUS_LINES.get(line_name.strip().lower())
 
 
 @dataclass(frozen=True)
@@ -127,6 +139,8 @@ class Train:
     information_type: str
     remark: str
     units: tuple[Unit, ...]
+    line_name: str | None = None
+    operator: str | None = None
 
     @property
     def has_forecast(self) -> bool:
@@ -235,9 +249,26 @@ class Train:
         label = product_label(self.product)
         if self.product == "TRAINBUS":
             # A replacement bus has an internal run number, not a train number
-            # anyone announces — showing it would only look like a train.
-            return label
+            # anyone announces — showing it would only look like a train. What
+            # it does have is a coloured line, and that is what is painted on
+            # the bus and printed on the sign.
+            line = bus_line(self.line_name)
+            return f"{line[0]} {label.lower()}" if line else label
         return f"{label} {self.train_id}".strip()
+
+    @property
+    def line(self) -> str | None:
+        """Name of the coloured bus line, e.g. "Rød"."""
+        line = bus_line(self.line_name)
+        return line[0] if line else None
+
+    @property
+    def colors(self) -> tuple[str | None, str | None]:
+        """Badge background and text colour, as the platform sign uses them."""
+        line = bus_line(self.line_name)
+        if line:
+            return line[1], line[2]
+        return PRODUCT_COLORS.get(self.product, (None, None))
 
 
 @dataclass(frozen=True)
@@ -323,6 +354,8 @@ def _parse_train(raw: dict[str, Any]) -> Train | None:
         information_type=str(raw.get("InformationType") or ""),
         remark=str(raw.get("Remark") or ""),
         units=tuple(_parse_unit(u) for u in raw.get("Routes") or ()),
+        line_name=raw.get("LineName") or None,
+        operator=(raw.get("TOC") or None) if raw.get("TOC") != "Ukendt" else None,
     )
 
 
@@ -365,9 +398,10 @@ def train_attributes(train: Train) -> dict[str, Any]:
         "tognummer": train.train_id,
         "produkt": train.product,
         "produkt_navn": product_label(train.product),
-        "operatoer": PRODUCT_OPERATORS.get(train.product),
-        "produkt_farve": PRODUCT_COLORS.get(train.product, (None, None))[0],
-        "produkt_tekstfarve": PRODUCT_COLORS.get(train.product, (None, None))[1],
+        "operatoer": train.operator or PRODUCT_OPERATORS.get(train.product),
+        "produkt_farve": train.colors[0],
+        "produkt_tekstfarve": train.colors[1],
+        "linje": train.line,
         "planlagt": train.scheduled.isoformat(),
         "forventet": train.expected.isoformat(),
         "prognose": train.has_forecast,

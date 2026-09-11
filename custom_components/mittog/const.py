@@ -5,7 +5,7 @@ from datetime import timedelta
 DOMAIN = "mittog"
 
 # Frontend card shipped with the integration.
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 CARD_URL = "/mittog_static/mittog-card.js"
 
 WS_URL = "wss://api.mittog.dk/api/ws/departure/{station}/dinstation/"
@@ -491,4 +491,22 @@ PRODUCT_OPERATORS: dict[str, str] = {
     "ØR": "Lokaltog",
     "ØT": "Lokaltog",
     "ØX": "Lokaltog",
+}
+
+# Replacement-bus lines. A togbus runs a coloured line, not a train number,
+# and the colour is what is painted on the bus and printed on the sign.
+# The feed carries it in LineName; mittog.dk lowercases before matching, so
+# we do the same and casing in the feed cannot bite us.
+BUS_LINES: dict[str, tuple[str, str, str]] = {
+    "rød": ("Rød", "#F03C1F", "#FFF"),
+    "blå": ("Blå", "#009DF4", "#FFF"),
+    "grøn": ("Grøn", "#50B12C", "#FFF"),
+    "lilla": ("Lilla", "#7670B3", "#FFF"),
+    "orange": ("Orange", "#EF7C00", "#000"),
+    "gul": ("Gul", "#FDC300", "#000"),
+    "brun": ("Brun", "#7A3F04", "#FFF"),
+    "pink": ("Pink", "#E90596", "#FFF"),
+    "turkis": ("Turkis", "#67C1BF", "#000"),
+    "sort": ("Sort", "#000000", "#FFF"),
+    "aqua": ("Aqua", "#479E9E", "#FFF"),
 }

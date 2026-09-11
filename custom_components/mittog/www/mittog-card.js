@@ -8,7 +8,7 @@
  * Deliberately dark in both themes — it is a platform display, not a document.
  */
 
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 
 // The feed lists cars front-first (verified on the platform at Vordingborg,
 // 7 Sep 2026). On Sydbanen the platform runs Nykøbing F on the left and
